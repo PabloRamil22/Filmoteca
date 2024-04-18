@@ -15,6 +15,9 @@ if (isset($_POST["email"])) {
     $stmt->bindParam(2,$password);
     $stmt->execute();
     if ($stmt->rowCount()>0) {
+      $result=$stmt->fetchAll();
+      $iduser=$result[0]["idUsuarios"];
+      $_SESSION["iduser"]=$iduser;
         $_SESSION["user"] = $email;
         $_SESSION["datos"] = "otros datos";
         header("Location: user.php");

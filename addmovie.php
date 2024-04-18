@@ -115,6 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="synopsis" class="form-label">Synopsis</label>
                 <textarea class="form-control" id="synopsis" name="synopsis" rows="3" required></textarea>
             </div>
+
             <div class="mb-3">
                 <label for="director" class="form-label">Director</label>
                 <input type="text" class="form-control" id="director" name="director" required>
