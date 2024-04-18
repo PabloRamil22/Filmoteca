@@ -1,0 +1,4 @@
+.small-img {
+    max-width: 200px; /* Ajusta el ancho máximo según tus necesidades */
+    height: auto; /* Esto asegura que la altura se ajuste automáticamente */
+}
