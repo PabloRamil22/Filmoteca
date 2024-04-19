@@ -30,7 +30,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comments</title>
-    <link rel="stylesheet" href="assets/css/comments.css">
+    <link rel="stylesheet" href="assets/css/coments.css">
 </head>
 <body>
     <button onclick="window.location.href='user.php'">Home</button>
@@ -43,8 +43,8 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo "<div class='comments-container'>";
         foreach ($comments as $comment) {
             echo "<div class='comment'>";
-            echo "<p><strong>Email:</strong> " . $comment['email'] . "</p>";
-            echo "<p>" . $comment['comentario'] . "</p>";
+            echo "<p><strong>Usuario:</strong> " . $comment['email'] . "</p>";
+            echo "<p><strong>Comentario:</strong>" . $comment['comentario'] . "</p>";
             echo "</div>";
         }
         echo "</div>";

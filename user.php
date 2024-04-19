@@ -11,6 +11,7 @@
 <body>
     <button onclick="window.location.href='addmovie.php'">Go to Add Movie</button>
     <button onclick="window.location.href='coments.php'">Comments</button>
+    <button onclick="window.location.href='pendiente.php'">Pendientes</button>
 
     <div class="container">
         <h1 class="mt-5 mb-4">IMDB</h1>
@@ -36,15 +37,18 @@
                 $stmt->execute([$usuario_id, $pelicula_id, $puntuacion]);
             }
 
-            // Preparar la consulta SQL para seleccionar todas las películas
+            // Preparar la consulta SQL para seleccionar todas las películas con la puntuación del usuario logeado
             $sql = "SELECT p.nombre as nombre, p.genero as genero, p.director as director,
-            p.duracion as duracion, p.sinopsis as sinopsis, pp.puntuacion as puntuacion, p.image as image,
-            p.idPelicula as idPelicula 
-            FROM imdb.peliculas as p LEFT JOIN puntuacion_peliculas as pp on p.idPelicula=pp.idPelicula";
-            $stmt = $conn->prepare($sql);
+                    p.duracion as duracion, p.sinopsis as sinopsis, pp.puntuacion as puntuacion, p.image as image,
+                    p.idPelicula as idPelicula 
+                    FROM imdb.peliculas as p 
+                    LEFT JOIN puntuacion_peliculas as pp 
+                    ON p.idPelicula = pp.idPelicula 
+                    AND pp.idUsuarios = ?";
 
-            // Ejecutar la consulta
-            $stmt->execute();
+            $stmt = $conn->prepare($sql);
+            $usuario_id = $_SESSION['iduser'];
+            $stmt->execute([$usuario_id]);
 
             // Obtener y mostrar los datos de las películas
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -58,9 +62,11 @@
                             <p class="card-text">Duración: <?php echo $row['duracion']; ?> minutos</p>
                             <p class="card-text">Sinopsis: <?php echo $row['sinopsis']; ?></p>
                         </div>
-                        <div class="puntuacion-recuadro">
-                            Mi puntuación: <span id="puntuacion_seleccionada"><?php echo $row['puntuacion']; ?></span>
-                        </div>
+                        <?php if ($row['puntuacion'] !== null) : ?>
+                            <div class="puntuacion-recuadro">
+                                Mi puntuación: <span id="puntuacion_seleccionada"><?php echo $row['puntuacion']; ?></span>
+                            </div>
+                        <?php endif; ?>
                         <img src="assets/img/<?php echo $row['image']; ?>" class="card-img-top img-fluid small-img" alt="Movie Image">
                         <form method="post">
                             <input type="hidden" name="pelicula_id" value="<?php echo $row['idPelicula']; ?>">
@@ -77,7 +83,6 @@
                             </select>
                             <button type="submit" name="puntuacion_peliculas">Puntuar</button>
                         </form>
-
                     </div>
                 </div>
             <?php
