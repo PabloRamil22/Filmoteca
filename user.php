@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User</title>
     <link rel="stylesheet" href="assets/css/user.css">
 </head>
-
 <body>
     <button onclick="window.location.href='addmovie.php'">Go to Add Movie</button>
     <button onclick="window.location.href='coments.php'">Comments</button>
@@ -35,6 +33,34 @@
                 ON DUPLICATE KEY UPDATE puntuacion = VALUES(puntuacion)
                 ");
                 $stmt->execute([$usuario_id, $pelicula_id, $puntuacion]);
+            }
+
+            // Verificar si se ha enviado una solicitud para agregar o quitar de pendientes
+            if(isset($_POST['add_to_watchlist']) && isset($_SESSION['iduser'])) {
+                // Obtener el ID de usuario de la sesión y el ID de película enviado por el formulario
+                $usuario_id = $_SESSION['iduser'];
+                $pelicula_id = $_POST['pelicula_id'];
+
+                // Verificar si la película ya está en la lista de pendientes
+                $stmt = $conn->prepare("SELECT * FROM pendiente WHERE idUsuario = ? AND idPelicula = ?");
+                $stmt->execute([$usuario_id, $pelicula_id]);
+                $exists = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if($exists) {
+                    // Si la película ya está en la lista, la eliminamos
+                    $stmt = $conn->prepare("DELETE FROM pendiente WHERE idUsuario = ? AND idPelicula = ?");
+                    $stmt->execute([$usuario_id, $pelicula_id]);
+                    // Mensaje de éxito o redirección
+                    // header("Location: user.php"); // Descomenta esta línea si deseas redireccionar
+                    // echo "Película eliminada de la lista de pendientes."; // O muestra un mensaje
+                } else {
+                    // Si la película no está en la lista, la agregamos
+                    $stmt = $conn->prepare("INSERT INTO pendiente (idUsuario, idPelicula) VALUES (?, ?)");
+                    $stmt->execute([$usuario_id, $pelicula_id]);
+                    // Mensaje de éxito o redirección
+                    // header("Location: user.php"); // Descomenta esta línea si deseas redireccionar
+                    // echo "Película añadida a la lista de pendientes."; // O muestra un mensaje
+                }
             }
 
             // Preparar la consulta SQL para seleccionar todas las películas con la puntuación del usuario logeado
@@ -83,6 +109,16 @@
                             </select>
                             <button type="submit" name="puntuacion_peliculas">Puntuar</button>
                         </form>
+                        <form method="post">
+                            <input type="hidden" name="pelicula_id" value="<?php echo $row['idPelicula']; ?>">
+                            <button type="submit" name="add_to_watchlist">
+                                <?php
+                                // Mostrar el texto del botón según si la película está en la lista de pendientes o no
+                                $watchlist_btn_text = $exists ? "Quitar de Pendientes" : "Añadir a Pendientes";
+                                echo $watchlist_btn_text;
+                                ?>
+                            </button>
+                        </form>
                     </div>
                 </div>
             <?php
@@ -94,5 +130,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/user.js"></script>
 </body>
-
 </html>
+
+ChatGPT
