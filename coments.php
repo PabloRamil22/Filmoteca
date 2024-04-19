@@ -1,3 +1,29 @@
+<?php
+// Iniciar sesión si aún no está iniciada
+session_start();
+
+// Incluir el archivo de conexión a la base de datos
+include("conexion.php");
+
+// Verificar si se ha enviado un nuevo comentario
+if(isset($_POST['submit']) && isset($_POST['comment']) && isset($_SESSION['iduser'])) {
+    // Obtener el comentario enviado
+    $nuevo_comentario = $_POST['comment'];
+    
+    // Insertar el nuevo comentario en la base de datos
+    $stmt = $conn->prepare("INSERT INTO comentario (comentario, idUsuarios) VALUES (?, ?)");
+    $stmt->execute([$nuevo_comentario, $_SESSION['iduser']]);
+}
+
+// Consulta para obtener los comentarios existentes
+$sql = "SELECT c.comentario, u.email 
+FROM imdb.comentario AS c 
+INNER JOIN imdb.usuarios AS u ON c.idUsuarios = u.idUsuarios";
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,17 +38,6 @@
     <h1 class="mt-5 mb-4">Comentarios</h1>
 
     <?php
-    // Incluir el archivo de conexión a la base de datos
-    include("conexion.php");
-
-    // Consulta para obtener los comentarios existentes
-    $sql = "SELECT p.comentario, u.email
-    FROM imdb.puntuacion_peliculas p
-    JOIN imdb.usuarios u ON p.idUsuarios = u.idUsuarios;";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute();
-    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
     // Mostrar los comentarios existentes
     if ($stmt->rowCount() > 0) {
         echo "<div class='comments-container'>";
@@ -34,21 +49,17 @@
         }
         echo "</div>";
     } else {
-        echo "<p>No comments yet.</p>";
+        echo "<p>No hay comentarios aún.</p>";
     }
     ?>
 
     <!-- Formulario para escribir un nuevo comentario -->
     <h2>Add Comment</h2>
-    <form action="add_comment.php" method="post">
-        <label for="user">Your Name:</label><br>
-        <input type="text" id="user" name="user"><br>
-        <label for="comment">Your Comment:</label><br>
+    <form action="" method="post">
+        <label for="comment">Comentarios:</label><br>
         <textarea id="comment" name="comment" rows="4" cols="50"></textarea><br>
         <button type="submit" name="submit">Submit</button>
     </form>
-
-    
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -11,6 +11,7 @@
 <body>
     <button onclick="window.location.href='addmovie.php'">Go to Add Movie</button>
     <button onclick="window.location.href='coments.php'">Comments</button>
+
     <div class="container">
         <h1 class="mt-5 mb-4">IMDB</h1>
         <div class="row">
@@ -36,11 +37,10 @@
             }
 
             // Preparar la consulta SQL para seleccionar todas las películas
-            $sql = "SELECT p.nombre as nombre,p.genero as genero,p.director as director,
-            p.duracion as duracion, p.sinopsis as sinopsis, pu.puntuacion as puntuacion,p.image as image,
+            $sql = "SELECT p.nombre as nombre, p.genero as genero, p.director as director,
+            p.duracion as duracion, p.sinopsis as sinopsis, pp.puntuacion as puntuacion, p.image as image,
             p.idPelicula as idPelicula 
-            FROM imdb.peliculas as p inner join puntuacion_peliculas as pu on p.idPelicula=pu.idPelicula;
-            ";
+            FROM imdb.peliculas as p LEFT JOIN puntuacion_peliculas as pp on p.idPelicula=pp.idPelicula";
             $stmt = $conn->prepare($sql);
 
             // Ejecutar la consulta
@@ -76,7 +76,6 @@
                                 ?>
                             </select>
                             <button type="submit" name="puntuacion_peliculas">Puntuar</button>
-
                         </form>
 
                     </div>
