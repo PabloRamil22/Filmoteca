@@ -24,7 +24,7 @@
 
             // Verificar si el usuario está logeado
             if (!isset($_SESSION['iduser'])) {
-                header("Location: login.php"); // Redireccionar al usuario a la página de inicio de sesión si no está logeado
+                header("Location: index.php"); // Redireccionar al usuario a la página de inicio de sesión si no está logeado
                 exit();
             }
 

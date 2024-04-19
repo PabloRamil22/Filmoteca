@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User</title>
     <link rel="stylesheet" href="assets/css/user.css">
 </head>
+
 <body>
     <button onclick="window.location.href='addmovie.php'">Go to Add Movie</button>
     <button onclick="window.location.href='coments.php'">Comments</button>
@@ -16,9 +18,12 @@
         <div class="row">
             <?php
             session_start();
+            $exists = false;
 
             // Incluir el archivo de conexión a la base de datos
             include("conexion.php");
+
+
 
             // Verificar si se ha enviado una puntuación
             if (isset($_POST['puntuacion_peliculas'])) {
@@ -36,7 +41,7 @@
             }
 
             // Verificar si se ha enviado una solicitud para agregar o quitar de pendientes
-            if(isset($_POST['add_to_watchlist']) && isset($_SESSION['iduser'])) {
+            if (isset($_POST['add_to_watchlist']) && isset($_SESSION['iduser'])) {
                 // Obtener el ID de usuario de la sesión y el ID de película enviado por el formulario
                 $usuario_id = $_SESSION['iduser'];
                 $pelicula_id = $_POST['pelicula_id'];
@@ -46,7 +51,7 @@
                 $stmt->execute([$usuario_id, $pelicula_id]);
                 $exists = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if($exists) {
+                if ($exists) {
                     // Si la película ya está en la lista, la eliminamos
                     $stmt = $conn->prepare("DELETE FROM pendiente WHERE idUsuario = ? AND idPelicula = ?");
                     $stmt->execute([$usuario_id, $pelicula_id]);
@@ -64,20 +69,40 @@
             }
 
             // Preparar la consulta SQL para seleccionar todas las películas con la puntuación del usuario logeado
-            $sql = "SELECT p.nombre as nombre, p.genero as genero, p.director as director,
-                    p.duracion as duracion, p.sinopsis as sinopsis, pp.puntuacion as puntuacion, p.image as image,
-                    p.idPelicula as idPelicula 
-                    FROM imdb.peliculas as p 
-                    LEFT JOIN puntuacion_peliculas as pp 
-                    ON p.idPelicula = pp.idPelicula 
-                    AND pp.idUsuarios = ?";
+            $sql = "SELECT 
+            p.idPelicula,
+            p.nombre,
+            p.director,
+            p.duracion,
+            p.genero,
+            p.sinopsis,
+            p.image,            
+            pp.puntuacion,
+            CASE 
+                WHEN pp.idPelicula IS NOT NULL THEN 'Puntuada'
+                ELSE 'No Puntuada'
+            END AS estado_puntuacion,
+            CASE 
+                WHEN pe.idPelicula IS NOT NULL THEN 'Pendiente'
+                ELSE 'No Pendiente'
+            END AS estado_pendiente
+        FROM 
+            peliculas p
+        LEFT JOIN 
+            puntuacion_peliculas pp ON p.idPelicula = pp.idPelicula AND pp.idUsuarios = ?
+        LEFT JOIN 
+            pendiente pe ON p.idPelicula = pe.idPelicula AND pe.idUsuario = ?;";
 
             $stmt = $conn->prepare($sql);
+            
             $usuario_id = $_SESSION['iduser'];
-            $stmt->execute([$usuario_id]);
+           
+            $stmt->execute([$usuario_id,$usuario_id]);
+          
 
             // Obtener y mostrar los datos de las películas
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+              
             ?>
                 <div class="col-md-4 mb-4">
                     <div class="card">
@@ -114,7 +139,7 @@
                             <button type="submit" name="add_to_watchlist">
                                 <?php
                                 // Mostrar el texto del botón según si la película está en la lista de pendientes o no
-                                $watchlist_btn_text = $exists ? "Quitar de Pendientes" : "Añadir a Pendientes";
+                                $watchlist_btn_text = $row['estado_pendiente']=="Pendiente" ? "Quitar de Pendientes" : "Añadir a Pendientes";
                                 echo $watchlist_btn_text;
                                 ?>
                             </button>
@@ -130,6 +155,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/user.js"></script>
 </body>
-</html>
 
-ChatGPT
+</html>
